@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Starter Site</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #0b0b0f;
+      --card: #14141b;
+      --accent: #7c5cff;
+      --text: #e8e8f0;
+      --muted: #9aa0b4;
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Inter, system-ui, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ===== PARTICLE CANVAS ===== */
+    #particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(14px);
+      background: rgba(10, 10, 15, 0.6);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      z-index: 100;
+    }
+
+    .nav {
+      max-width: 1100px;
+      margin: auto;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .logo img {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 10px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .nav-links button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: 0.25s cubic-bezier(.34,1.56,.64,1);
+    }
+
+    .nav-links button:hover {
+      transform: translateY(-2px) scale(1.05);
+      color: white;
+    }
+
+    .nav-links button:active {
+      transform: scale(0.9);
+    }
+
+    .nav-links button.active {
+      background: var(--accent);
+      color: white;
+    }
+
+    .menu-toggle { display: none; font-size: 22px; cursor: pointer; }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background: #0f0f17;
+      padding: 20px;
+      transition: 0.3s ease;
+      z-index: 200;
+      box-shadow: 20px 0 50px rgba(0,0,0,0.6);
+    }
+
+    .sidebar.open { left: 0; }
+
+    .sidebar button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: var(--card);
+      color: white;
+      cursor: pointer;
+    }
+
+    main {
+      flex: 1;
+      max-width: 1100px;
+      margin: auto;
+      padding: 40px 20px 60px;
+      width: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page { display: none; animation: fade 0.25s ease; }
+    .page.active { display: block; }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+
+    .box {
+      background: linear-gradient(180deg, #181824, #12121a);
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: 0.25s cubic-bezier(.34,1.56,.64,1);
+      cursor: pointer;
+    }
+
+    .box:hover {
+      transform: translateY(-6px) scale(1.03);
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+    }
+
+    .box:active { transform: scale(0.95); }
+
+    .box img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 14px;
+      margin-bottom: 10px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 700px) {
+      .nav-links { display: none; }
+      .menu-toggle { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="particles"></canvas>
+
+  <div class="sidebar" id="sidebar">
+    <button onclick="navTo('home')">Home</button>
+    <button onclick="navTo('about')">About</button>
+    <button onclick="navTo('projects')">Projects</button>
+    <button onclick="navTo('contact')">Contact</button>
+  </div>
+
+  <header>
+    <div class="nav">
+      <div class="logo">
+        <img src="https://via.placeholder.com/32" alt="logo">
+        YourSite
+      </div>
+
+      <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+
+      <div class="nav-links">
+        <button class="active" onclick="showPage('home', this)">Home</button>
+        <button onclick="showPage('about', this)">About</button>
+        <button onclick="showPage('projects', this)">Projects</button>
+        <button onclick="showPage('contact', this)">Contact</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="home" class="page active">
+      <h1>Welcome</h1>
+      <p>Add your own content boxes below.</p>
+
+      <div class="grid">
+        <div class="box">
+          <img src="https://via.placeholder.com/400x200" alt="">
+          <h3>Your Item</h3>
+          <p>Replace this text.</p>
+        </div>
+
+        <div class="box">
+          <img src="https://via.placeholder.com/400x200" alt="">
+          <h3>Your Item</h3>
+          <p>Replace this text.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="page"><h1>About</h1></section>
+    <section id="projects" class="page"><h1>Projects</h1></section>
+    <section id="contact" class="page"><h1>Contact</h1></section>
+  </main>
+
+  <footer>© 2026 YourSite</footer>
+
+  <script>
+    function showPage(id, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (btn) {
+        document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+
+    function navTo(id) {
+      showPage(id);
+      toggleMenu(false);
+    }
+
+    function toggleMenu(force) {
+      const sb = document.getElementById('sidebar');
+      if (force === false) return sb.classList.remove('open');
+      sb.classList.toggle('open');
+    }
+
+    // ===== RAIN PARTICLES =====
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+
+    let drops = [];
+    let splashes = [];
+    const mouse = { x: -9999, y: -9999 };
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    function spawnDrop() {
+      drops.push({
+        x: Math.random() * canvas.width,
+        y: -10,
+        vy: 4 + Math.random() * 4
+      });
+    }
+
+    function burst(x, y) {
+      for (let i = 0; i < 6; i++) {
+        splashes.push({
+          x,
+          y,
+          vx: (Math.random() - 0.5) * 3,
+          vy: (Math.random() - 0.7) * 3,
+          life: 30
+        });
+      }
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (drops.length < 120) spawnDrop();
+
+      // rain
+      for (let i = drops.length - 1; i >= 0; i--) {
+        const d = drops[i];
+        d.y += d.vy;
+
+        // cursor hit
+        const dx = d.x - mouse.x;
+        const dy = d.y - mouse.y;
+        if (Math.sqrt(dx * dx + dy * dy) < 20) {
+          burst(d.x, d.y);
+          drops.splice(i, 1);
+          continue;
+        }
+
+        // bottom hit
+        if (d.y > canvas.height - 2) {
+          burst(d.x, canvas.height - 2);
+          drops.splice(i, 1);
+          continue;
+        }
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, 2, 0, Math.PI * 2);
+        ctx.fillStyle = '#7c5cff';
+        ctx.fill();
+      }
+
+      // splashes
+      for (let i = splashes.length - 1; i >= 0; i--) {
+        const s = splashes[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.08;
+        s.life--;
+
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#b4a7ff';
+        ctx.fill();
+
+        if (s.life <= 0) splashes.splice(i, 1);
+      }
+
+      requestAnimationFrame(tick);
+    }
+    tick();
+  </script>
+</body>
+</html>
